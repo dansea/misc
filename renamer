@@ -1,0 +1,43 @@
+package com.renamer;
+
+import java.io.*;
+import java.io.File;
+
+public class Renamer {
+
+
+    public static void main(String [] args) throws IOException {
+
+        BufferedReader bufferedReader1 = new BufferedReader((new InputStreamReader(System.in))); // читаем из консоли, где лежит список файлов , для переименования
+        BufferedReader bufferedReader2 = new BufferedReader((new InputStreamReader(System.in))); // читаем из консоли, где лежит список названий будущих
+        BufferedReader bufferedReader3 = new BufferedReader((new InputStreamReader(System.in))); // читаем из консоли, куда писать переименованные файлы
+
+        String files = bufferedReader1.readLine();
+        String names = bufferedReader2.readLine();
+        String destination_place = bufferedReader3.readLine();
+
+        bufferedReader1.close();
+        bufferedReader2.close();
+        bufferedReader3.close();
+
+        BufferedReader namesReader = new BufferedReader(new FileReader(names));
+
+        File[] filesList;
+        File filesPath = new File(files); // создаем объект на папку с файлами
+        filesList = filesPath.listFiles(); // записываем файлы из папки в массив объектов типа File
+        String stringBuilder = null;
+
+
+        while (namesReader.ready())// читаем по одной строке из файла и переименовываем затем файлы на жестком диске
+        {
+
+            for(int i=0; i<filesList.length; i++)
+            {
+                String s = namesReader.readLine(); //читаем название из списка
+                stringBuilder = destination_place + "\\" +  s + ".jpg" ;
+                filesList[i].renameTo(new java.io.File(stringBuilder));  // читаем текущее имя файла, переименовываем и записываем
+            }
+        }
+        namesReader.close();
+    }
+}
