@@ -1,0 +1,139 @@
+import java.io.*;
+
+
+public class strings_former {
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader1 = new BufferedReader((new InputStreamReader(System.in))); // читаем из консоли, где лежит список файлов , для переименования
+        BufferedReader bufferedReader2 = new BufferedReader((new InputStreamReader(System.in))); // читаем из консоли, куда писать переименованные файлы
+
+        String input_files = bufferedReader1.readLine();
+        String output_files = bufferedReader2.readLine();
+
+        bufferedReader1.close();
+        bufferedReader2.close();
+        Boolean IsFirstCharacter = false;
+        File[] filesList;
+        File filesPath = new File(input_files); // создаем объект на папку с файлами
+        filesList = filesPath.listFiles(); // записываем файлы из папки в массив объектов типа File
+        String stringBuilder = null;
+
+        for (int i = 0; i < filesList.length; i++) {
+            //читаем из массива файлов каждый файл построчно, модифицируем в нём каждую строку
+            //и записываем в новую папку
+            BufferedReader bufferedReader3 = new BufferedReader((new FileReader(filesList[i])));
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(output_files + "\\" + filesList[i].getName()));
+            int nulls = 0;
+            int ones = 0;
+
+
+            while (bufferedReader3.ready()) {
+                String temp = bufferedReader3.readLine();
+
+                if (!temp.equals("")) //если случайно остались пустые строки-затираем
+                {
+                    for (int k = 0; k < temp.length(); k++)
+                    {
+                        String temper = temp.substring(k, k+1);
+
+                        if (temper.equals("0"))
+                        {
+                            nulls++;
+                            if ((k==temp.length()-1) )  //если дошли до конца строки
+                            {
+                                if (stringBuilder != null)
+                                {
+                                    //здесь и далее 50000-это просто как бы "символ конца строки,
+                                    // т.е. большое число, которое больше нигде кроме конца строки
+                                    // не встречается
+                                    stringBuilder = stringBuilder + "-" + nulls + ",50000,";
+                                    nulls=0;
+                                }
+                                else
+                                {
+                                    stringBuilder = "-" + nulls + ",50000,";
+                                    nulls=0;
+                                }
+                            }
+                            if  (ones>0)//если были 1-ки и наткнулись на 0
+                            {
+                                if (stringBuilder != null)
+                                {
+                                    stringBuilder = stringBuilder + ones + ",";
+                                    ones=0;
+                                }
+                                else
+                                {
+                                    stringBuilder = ones + ",";
+                                    ones=0;
+                                }
+                            }
+                        }
+                        else if (temper.equals("1"))
+                        {
+                            ones++;
+
+                            if  (k==temp.length()-1) //если дошли до конца строки
+                            {
+                                if (stringBuilder!=null)
+                                {
+                                    stringBuilder = stringBuilder + ones + ",50000,";
+                                    ones=0;
+                                }
+                                else
+                                {
+                                    stringBuilder = ones + ",50000,";
+                                    ones=0;
+                                }
+                            }
+
+                            if (nulls>0) //если были 0-ки и наткнулись на 1
+                            {
+                                if (stringBuilder != null)
+                                {
+                                    stringBuilder = stringBuilder + "-" + nulls + ",";
+                                    nulls=0;
+                                }
+                                else
+                                {
+                                    stringBuilder = "-" + nulls + ",";
+                                    nulls=0;
+                                }
+                            }
+                        }
+
+                    }
+                   //перенос каждой строки на новую
+//                    stringBuilder = stringBuilder + "\n";
+
+                    //если дошли до конца файла - "отрезаем" финальную запятую
+                    // и добавляем в начале добавку
+                    if (bufferedReader3.ready())
+                    {
+                        if (!IsFirstCharacter)
+                        {
+                            //вместо myStrings вписать букву алфавита,
+                            // при вставке в Arduino IDE
+                            bufferedWriter.write("int " +  filesList[i].getName().replaceAll(".txt", "").replaceAll("\\d*" , "") + " [] = {" + "\n");
+                            bufferedWriter.write(stringBuilder);
+                            IsFirstCharacter = true;
+                        }
+                        else
+                        {
+                            bufferedWriter.write(stringBuilder);
+                        }
+                    }
+                    else
+                    {
+                        bufferedWriter.write(stringBuilder.substring(0, stringBuilder.length()-1) + "};");
+                    }
+                    stringBuilder=null;
+                }
+            }
+            IsFirstCharacter = false;
+            bufferedReader3.close();
+            bufferedWriter.close();
+
+        }
+    }
+}
+
